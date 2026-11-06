@@ -1,4 +1,4 @@
-import { randomBytes } from 'node:crypto';
+// import { randomBytes } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -51,14 +51,15 @@ export const configuracao = {
     },
   },
 
-  /** Captcha do login (ALTCHA, prova de trabalho; não depende de serviço externo) */
-  captcha: {
-    /**
-     * Segredo HMAC que assina os desafios. Sem valor, é gerado a cada subida da API
-     * (ok em desenvolvimento; em produção defina, e use o mesmo em todas as instâncias).
-     */
-    segredo: process.env.CAPTCHA_SECRET || randomBytes(32).toString('hex'),
-    /** Validade do desafio, em segundos */
-    validadeSegundos: Number(process.env.CAPTCHA_VALIDADE ?? 600),
-  },
+  //   /** Captcha do login (ALTCHA, prova de trabalho; não depende de serviço externo) */
+  //   captcha: {
+  //     /**
+  //      * Segredo HMAC que assina os desafios. Sem valor, é gerado a cada subida da API
+  //      * (ok em desenvolvimento; em produção defina, e use o mesmo em todas as instâncias).
+  //      */
+  //     segredo: process.env.CAPTCHA_SECRET || randomBytes(32).toString('hex'),
+  //     /** Validade do desafio, em segundos */
+  //     validadeSegundos: Number(process.env.CAPTCHA_VALIDADE ?? 600),
+  //   },
+  //
 };

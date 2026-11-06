@@ -36,8 +36,8 @@ export interface SessaoCognito {
 
 /**
  * Chamadas ao Cognito (user pool do admin) feitas pela API, que funciona como
- * "BFF" do login: o admin nunca fala direto com o Cognito, então o captcha não
- * pode ser contornado e o segredo do app client (se houver) fica só no servidor.
+ * "BFF" do login: o admin nunca fala direto com o Cognito e o segredo do app
+ * client (se houver) fica só no servidor. Captcha temporariamente desativado.
  */
 @Injectable()
 export class CognitoService {

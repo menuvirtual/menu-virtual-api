@@ -6,12 +6,12 @@ import { configuracao } from '../configuracao.js';
 import { Restaurante } from '../restaurantes/restaurante.entity.js';
 import { AuthController, PerfilController } from './auth.controller.js';
 import { AuthGuard } from './auth.guard.js';
-import { CaptchaService } from './captcha.service.js';
+// import { CaptchaService } from './captcha.service.js';
 import { CognitoService } from './cognito.service.js';
 import { VerificadorToken } from './verificador-token.js';
 
 /**
- * Login (Cognito + captcha) e proteção das rotas: o AuthGuard é global, então
+ * Login (Cognito; captcha temporariamente desativado) e proteção das rotas: o AuthGuard é global, então
  * toda rota exige Bearer token, exceto as marcadas com @Publica().
  */
 @Module({
@@ -19,7 +19,7 @@ import { VerificadorToken } from './verificador-token.js';
   controllers: [AuthController, PerfilController],
   providers: [
     CognitoService,
-    CaptchaService,
+    // CaptchaService, // temporariamente desativado
     VerificadorToken,
     { provide: APP_GUARD, useClass: AuthGuard },
   ],

@@ -51,22 +51,20 @@ No cognito-local o usuário diferencia maiúsculas de minúsculas (digite `USER1
 
 | Rota (pública) | O que faz |
 |----------------|-----------|
-| `GET /auth/captcha` | desafio do captcha (ALTCHA) |
-| `POST /auth/login` | `{ usuario, senha, captcha }` → `{ sessao: { accessToken, refreshToken, expiraEm, usuario } }` ou, no primeiro acesso, `{ desafio }` |
+| `GET /auth/captcha` | temporariamente desativado (404) |
+| `POST /auth/login` | `{ usuario, senha }` → `{ sessao: { accessToken, refreshToken, expiraEm, usuario } }` ou, no primeiro acesso, `{ desafio }` |
 | `POST /auth/nova-senha` | `{ usuario, desafio, novaSenha }`: troca a senha temporária e abre a sessão |
 | `POST /auth/renovar` | `{ usuario, refreshToken }` → novo access token |
-| `POST /auth/esqueci-senha` | `{ usuario, captcha }`: envia código por e-mail (sempre 204, não revela se o usuário existe) |
+| `POST /auth/esqueci-senha` | `{ usuario }`: envia código por e-mail (sempre 204, não revela se o usuário existe) |
 | `POST /auth/redefinir-senha` | `{ usuario, codigo, novaSenha }` |
 
 Toda rota fora de `/auth` e do `GET /menu` exige `Authorization: Bearer <accessToken>` (guard global
 `AuthGuard`; rotas livres usam `@Publica()`). O token é validado pelas chaves públicas (JWKS) do user pool:
 assinatura, emissor, validade, `token_use = access` e `client_id`. No Swagger, use o botão **Authorize**.
 
-- **Captcha:** [ALTCHA](https://altcha.org), prova de trabalho (~1 s no navegador), sem serviço externo.
-  Obrigatório no login e no "esqueci a senha"; cada resposta vale uma vez e expira em 10 min.
-  Os desafios usados ficam em memória: com mais de uma instância da API, troque por um armazenamento
-  compartilhado e defina `CAPTCHA_SECRET` (igual em todas). O widget precisa de contexto seguro
-  (HTTPS ou `localhost`).
+- **Captcha:** temporariamente desativado. O código ALTCHA foi comentado e preservado
+  para retomada; login e recuperação de senha não exigem captcha. As variáveis
+  `CAPTCHA_SECRET` e `CAPTCHA_VALIDADE` não são utilizadas enquanto estiver desativado.
 - **Senhas:** mínimo 8 caracteres, com maiúscula, minúscula, número e símbolo.
 - **Primeiro acesso / esqueci a senha:** o cognito-local não envia e-mail; o código aparece no log:
   `docker logs menu-api-cognito`.
@@ -287,5 +285,5 @@ Lidas do ambiente ou de um `.env` na raiz (modelo em `.env.example`).
 | `COGNITO_USER_POOL_ID` / `COGNITO_CLIENT_ID` | — | user pool e app client (obrigatórios; `cognito:setup` preenche) |
 | `COGNITO_CLIENT_SECRET` | — | segredo do app client, se houver (recomendado em produção) |
 | `COGNITO_GRUPO_SUPERUSUARIO` | `SuperUsuario` | grupo do Cognito com acesso a todos os restaurantes |
-| `CAPTCHA_SECRET` | aleatório a cada subida | segredo HMAC dos desafios do captcha (defina em produção) |
-| `CAPTCHA_VALIDADE` | `600` | validade do desafio, em segundos |
+| `CAPTCHA_SECRET` | aleatório a cada subida | temporariamente desativado; configuração preservada |
+| `CAPTCHA_VALIDADE` | `600` | temporariamente desativado; configuração preservada |

@@ -1,7 +1,7 @@
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Test } from '@nestjs/testing';
-import { solveChallenge, type Challenge } from 'altcha-lib';
-import { deriveKey } from 'altcha-lib/algorithms/pbkdf2';
+// import { solveChallenge, type Challenge } from 'altcha-lib';
+// import { deriveKey } from 'altcha-lib/algorithms/pbkdf2';
 import request from 'supertest';
 import { DataSource } from 'typeorm';
 import { AppModule } from './../src/app.module.js';
@@ -32,20 +32,21 @@ export async function criarAppTeste(): Promise<{
   return { app, dataSource };
 }
 
-/** Resolve o captcha como o widget do navegador faz (resposta em base64). */
-export async function resolverCaptcha(
-  app: NestExpressApplication,
-): Promise<string> {
-  const desafio = (
-    await request(app.getHttpServer()).get('/auth/captcha').expect(200)
-  ).body as Challenge;
-  const solucao = await solveChallenge({ challenge: desafio, deriveKey });
-  return Buffer.from(
-    JSON.stringify({ challenge: desafio, solution: solucao }),
-  ).toString('base64');
-}
-
-/** Faz login (com captcha) e devolve o access token. */
+// /** Resolve o captcha como o widget do navegador faz (resposta em base64). */
+// export async function resolverCaptcha(
+//   app: NestExpressApplication,
+// ): Promise<string> {
+//   const desafio = (
+//     await request(app.getHttpServer()).get('/auth/captcha').expect(200)
+//   ).body as Challenge;
+//   const solucao = await solveChallenge({ challenge: desafio, deriveKey });
+//   return Buffer.from(
+//     JSON.stringify({ challenge: desafio, solution: solucao }),
+//   ).toString('base64');
+// }
+//
+//
+/** Faz login (sem captcha) e devolve o access token. */
 export async function entrar(
   app: NestExpressApplication,
   usuario: string,
@@ -53,7 +54,7 @@ export async function entrar(
 ): Promise<string> {
   const res = await request(app.getHttpServer())
     .post('/auth/login')
-    .send({ usuario, senha, captcha: await resolverCaptcha(app) })
+    .send({ usuario, senha })
     .expect(200);
   return (res.body as { sessao: { accessToken: string } }).sessao.accessToken;
 }

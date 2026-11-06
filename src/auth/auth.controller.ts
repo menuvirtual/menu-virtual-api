@@ -1,4 +1,11 @@
-import { Body, Controller, Get, Header, HttpCode, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  // Header,
+  HttpCode,
+  Post,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, type Repository } from 'typeorm';
@@ -12,7 +19,7 @@ import {
   RespostaLoginDto,
   SessaoDto,
 } from './auth.dto.js';
-import { CaptchaService } from './captcha.service.js';
+// import { CaptchaService } from './captcha.service.js';
 import { CognitoService } from './cognito.service.js';
 import {
   Publica,
@@ -26,26 +33,28 @@ import {
 export class AuthController {
   constructor(
     private readonly cognito: CognitoService,
-    private readonly captcha: CaptchaService,
+    // private readonly captcha: CaptchaService,
   ) {}
 
-  /** Novo desafio do captcha (ALTCHA), para o widget da tela de login */
-  @Get('captcha')
-  // cada desafio vale uma vez: o navegador nunca pode reaproveitar do cache
-  @Header('Cache-Control', 'no-store')
-  captchaDesafio() {
-    return this.captcha.criarDesafio();
-  }
-
+  //   /** Novo desafio do captcha (ALTCHA), para o widget da tela de login */
+  //   @Get('captcha')
+  //   // cada desafio vale uma vez: o navegador nunca pode reaproveitar do cache
+  //   @Header('Cache-Control', 'no-store')
+  //   captchaDesafio() {
+  //     return this.captcha.criarDesafio();
+  //   }
+  //
+  //
   /**
-   * Login com usuário, senha e captcha. Devolve a sessão (tokens) ou, no primeiro
+   * Login com usuário e senha (captcha temporariamente desativado). Devolve a sessão (tokens) ou, no primeiro
    * acesso, um `desafio` para definir a senha em POST /auth/nova-senha.
-   * 401 usuário/senha inválidos; 400 captcha inválido.
+   * 401 usuário/senha inválidos.
    */
   @Post('login')
   @HttpCode(200)
   async login(@Body() dto: LoginDto): Promise<RespostaLoginDto> {
-    await this.captcha.exigirValido(dto.captcha);
+    // Captcha temporariamente desativado.
+    // await this.captcha.exigirValido(dto.captcha);
     const resultado = await this.cognito.entrar(dto.usuario, dto.senha);
     return resultado.tipo === 'sessao'
       ? { sessao: resultado.sessao }
@@ -74,7 +83,8 @@ export class AuthController {
   @Post('esqueci-senha')
   @HttpCode(204)
   async esqueciSenha(@Body() dto: EsqueciSenhaDto): Promise<void> {
-    await this.captcha.exigirValido(dto.captcha);
+    // Captcha temporariamente desativado.
+    // await this.captcha.exigirValido(dto.captcha);
     await this.cognito.esqueciSenha(dto.usuario);
   }
 

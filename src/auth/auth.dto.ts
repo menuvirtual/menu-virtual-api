@@ -16,15 +16,15 @@ class ComUsuarioDto {
   usuario: string;
 }
 
-class ComCaptchaDto extends ComUsuarioDto {
-  /** Resposta do widget de captcha (ALTCHA), obtida a partir de GET /auth/captcha */
-  @IsNotEmpty({ message: 'Confirme que você não é um robô.' })
-  @IsString()
-  @MaxLength(4096)
-  captcha: string;
-}
+// class ComCaptchaDto extends ComUsuarioDto {
+//   /** Resposta do widget de captcha (ALTCHA), obtida a partir de GET /auth/captcha */
+//   @IsNotEmpty({ message: 'Confirme que você não é um robô.' })
+//   @IsString()
+//   @MaxLength(4096)
+//   captcha: string;
+// }
 
-export class LoginDto extends ComCaptchaDto {
+export class LoginDto extends ComUsuarioDto {
   @IsNotEmpty({ message: 'Informe a senha.' })
   @IsString()
   @MaxLength(256)
@@ -50,7 +50,7 @@ export class RenovarDto extends ComUsuarioDto {
   refreshToken: string;
 }
 
-export class EsqueciSenhaDto extends ComCaptchaDto {}
+export class EsqueciSenhaDto extends ComUsuarioDto {}
 
 export class RedefinirSenhaDto extends ComUsuarioDto {
   /** Código enviado por e-mail @example "123456" */

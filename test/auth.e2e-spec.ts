@@ -12,7 +12,7 @@ import {
   comToken,
   criarAppTeste,
   entrar,
-  resolverCaptcha,
+  // resolverCaptcha,
 } from './app-teste.js';
 
 interface Perfil {
@@ -41,13 +41,13 @@ describe('Login e acesso por usuário (e2e)', () => {
   });
 
   describe('POST /auth/login', () => {
-    it('devolve a sessão (access token, refresh token, validade e usuário)', async () => {
+    it('devolve a sessão sem captcha (access token, refresh token, validade e usuário)', async () => {
       const res = await publico()
         .post('/auth/login')
         .send({
           usuario: 'USER1',
           senha: 'Menu@12345',
-          captcha: await resolverCaptcha(app),
+          // captcha: await resolverCaptcha(app),
         })
         .expect(200);
       expect(res.body.sessao).toMatchObject({
@@ -59,31 +59,38 @@ describe('Login e acesso por usuário (e2e)', () => {
       expect(res.body.sessao.expiraEm).toBeGreaterThan(Date.now() / 1000);
     });
 
-    it('exige o captcha; captcha inválido ou reutilizado dá 400', async () => {
-      const semCaptcha = await publico()
-        .post('/auth/login')
-        .send({ usuario: 'USER1', senha: 'Menu@12345' })
-        .expect(400);
-      expect(JSON.stringify(semCaptcha.body.message)).toContain(
-        'não é um robô',
-      );
-      await publico()
-        .post('/auth/login')
-        .send({ usuario: 'USER1', senha: 'Menu@12345', captcha: 'bGl4bw==' })
-        .expect(400);
-
-      const captcha = await resolverCaptcha(app);
-      await publico()
-        .post('/auth/login')
-        .send({ usuario: 'USER1', senha: 'Menu@12345', captcha })
-        .expect(200);
-      const repetido = await publico()
-        .post('/auth/login')
-        .send({ usuario: 'USER1', senha: 'Menu@12345', captcha })
-        .expect(400);
-      expect(repetido.body.message).toContain(
-        'Verificação de segurança inválida',
-      );
+    //     it('exige o captcha; captcha inválido ou reutilizado dá 400', async () => {
+    //       const semCaptcha = await publico()
+    //         .post('/auth/login')
+    //         .send({ usuario: 'USER1', senha: 'Menu@12345' })
+    //         .expect(400);
+    //       expect(JSON.stringify(semCaptcha.body.message)).toContain(
+    //         'não é um robô',
+    //       );
+    //       await publico()
+    //         .post('/auth/login')
+    //         .send({ usuario: 'USER1', senha: 'Menu@12345', captcha: 'bGl4bw==' })
+    //         .expect(400);
+    //
+    //       const captcha = await resolverCaptcha(app);
+    //       await publico()
+    //         .post('/auth/login')
+    //         .send({ usuario: 'USER1', senha: 'Menu@12345', captcha })
+    //         .expect(200);
+    //       const repetido = await publico()
+    //         .post('/auth/login')
+    //         .send({ usuario: 'USER1', senha: 'Menu@12345', captcha })
+    //         .expect(400);
+    //       expect(repetido.body.message).toContain(
+    //         'Verificação de segurança inválida',
+    //       );
+    //     });
+    //
+    //
+    it('continua exigindo usuário e senha quando o captcha está desativado', async () => {
+      for (const dados of [{ usuario: 'USER1' }, { senha: 'Menu@12345' }, {}])
+        await publico().post('/auth/login').send(dados).expect(400);
+      await publico().post('/auth/esqueci-senha').send({}).expect(400);
     });
 
     it('senha errada e usuário inexistente dão a mesma resposta (401)', async () => {
@@ -93,7 +100,7 @@ describe('Login e acesso por usuário (e2e)', () => {
       ]) {
         const res = await publico()
           .post('/auth/login')
-          .send({ usuario, senha, captcha: await resolverCaptcha(app) })
+          .send({ usuario, senha })
           .expect(401);
         expect(res.body.message).toBe('Usuário ou senha inválidos.');
       }
@@ -105,7 +112,7 @@ describe('Login e acesso por usuário (e2e)', () => {
         .send({
           usuario: 'USER2',
           senha: 'Menu@12345',
-          captcha: await resolverCaptcha(app),
+          // captcha: await resolverCaptcha(app),
         })
         .expect(200);
       const renovado = await publico()
@@ -146,7 +153,7 @@ describe('Login e acesso por usuário (e2e)', () => {
           .send({
             usuario,
             senha: 'Temp@12345',
-            captcha: await resolverCaptcha(app),
+            // captcha: await resolverCaptcha(app),
           })
           .expect(200);
         expect(login.body.sessao).toBeUndefined();
@@ -183,12 +190,12 @@ describe('Login e acesso por usuário (e2e)', () => {
       for (const usuario of ['USER2', 'NAO-EXISTE'])
         await publico()
           .post('/auth/esqueci-senha')
-          .send({ usuario, captcha: await resolverCaptcha(app) })
+          .send({ usuario })
           .expect(204);
       await publico()
         .post('/auth/esqueci-senha')
         .send({ usuario: 'USER2' })
-        .expect(400);
+        .expect(204);
       const res = await publico()
         .post('/auth/redefinir-senha')
         .send({ usuario: 'USER2', codigo: '000000', novaSenha: 'Nova@12345' })
@@ -204,7 +211,7 @@ describe('Login e acesso por usuário (e2e)', () => {
       const adulterado = tokens.USER1.slice(0, -4) + 'AAAA';
       await comToken(app, adulterado).get('/admin/restaurantes').expect(401);
       await publico().get('/menu?restaurante=casa-italiana').expect(200);
-      await publico().get('/auth/captcha').expect(200);
+      await publico().get('/auth/captcha').expect(404);
     });
   });
 

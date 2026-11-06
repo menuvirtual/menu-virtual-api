@@ -1,0 +1,44 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: menu-api-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: menu
+      MYSQL_USER: menu
+      MYSQL_PASSWORD: menu
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    ports:
+      # 3307 no host para não conflitar com outro MySQL local na 3306
+      - '127.0.0.1:3307:3306'
+    volumes:
+      - mysql-data:/var/lib/mysql
+      # Executado só na primeira subida (volume vazio): cria o banco dos testes e2e
+      - ./docker/mysql-init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', '127.0.0.1', '-uroot', '-proot']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # Emulador do AWS Cognito para desenvolvimento (o Cognito real ainda não existe).
+  # Configurado por `npm run cognito:setup` (user pool, app client, grupo e usuários).
+  cognito:
+    image: jagregory/cognito-local:latest
+    container_name: menu-api-cognito
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:9229:9229'
+    # Copia a configuração a cada subida: usuários com nome livre (USER1...) em vez de
+    # e-mail e emissor dos tokens em http://localhost:9229
+    entrypoint: ['sh', '-c', 'cp /config/cognito-local.json /app/.cognito/config.json && exec node /app/start.js']
+    volumes:
+      - cognito-data:/app/.cognito
+      - ./docker/cognito-local.json:/config/cognito-local.json:ro
+
+volumes:
+  mysql-data:
+  cognito-data:
